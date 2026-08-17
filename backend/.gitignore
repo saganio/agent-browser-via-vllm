@@ -77,3 +77,4 @@ Thumbs.db
 .env.example
 .env
 env.example
+.agents/*
