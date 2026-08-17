@@ -45,5 +45,6 @@ Thumbs.db
 
 # Cache
 .cache/
+.vite/
 .eslintcache
 .stylelintcache

@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     
     # Database
     DATABASE_URL: str = Field(
-        default="postgresql+asyncpg://uguryildiz@localhost:5432/browser_tests"
+        default="postgresql+asyncpg://postgres:postgres@localhost:5432/browser_tests"
     )
     
     # Redis
