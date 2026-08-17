@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/auth/AuthProvider';
 import { ProtectedRoute } from '@/auth/ProtectedRoute';
+import { ThemeProvider } from '@/context/ThemeProvider';
 import { MainLayout } from '@/components/layout/MainLayout';
 
 // Pages
@@ -31,66 +32,68 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+      <ThemeProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-            {/* Auth callback for OIDC */}
-            <Route path="/auth/callback" element={<OIDCCallback />} />
+              {/* Auth callback for OIDC */}
+              <Route path="/auth/callback" element={<OIDCCallback />} />
 
-            {/* Protected routes */}
-            <Route
-              element={
-                <ProtectedRoute>
-                  <MainLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/projects" element={<Projects />} />
-              <Route path="/projects/:id/settings" element={<ProjectSettings />} />
+              {/* Protected routes */}
               <Route
-                path="/tests/run"
                 element={
-                  <ProtectedRoute requiredRole="developer">
-                    <TestRunner />
+                  <ProtectedRoute>
+                    <MainLayout />
                   </ProtectedRoute>
                 }
-              />
-              <Route path="/tests" element={<TestHistory />} />
-              <Route path="/tests/:id" element={<TestDetails />} />
-              <Route path="/test-sets" element={<TestSets />} />
-              <Route path="/test-sets/:id" element={<TestSetDetail />} />
-              <Route
-                path="/schedules"
-                element={
-                  <ProtectedRoute requiredRole="developer">
-                    <Schedules />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/reports" element={<Reports />} />
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute requiredRole="admin">
-                    <Settings />
-                  </ProtectedRoute>
-                }
-              />
-            </Route>
+              >
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/projects" element={<Projects />} />
+                <Route path="/projects/:id/settings" element={<ProjectSettings />} />
+                <Route
+                  path="/tests/run"
+                  element={
+                    <ProtectedRoute requiredRole="developer">
+                      <TestRunner />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/tests" element={<TestHistory />} />
+                <Route path="/tests/:id" element={<TestDetails />} />
+                <Route path="/test-sets" element={<TestSets />} />
+                <Route path="/test-sets/:id" element={<TestSetDetail />} />
+                <Route
+                  path="/schedules"
+                  element={
+                    <ProtectedRoute requiredRole="developer">
+                      <Schedules />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/reports" element={<Reports />} />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <Settings />
+                    </ProtectedRoute>
+                  }
+                />
+              </Route>
 
-            {/* Unauthorized page */}
-            <Route path="/unauthorized" element={<Unauthorized />} />
+              {/* Unauthorized page */}
+              <Route path="/unauthorized" element={<Unauthorized />} />
 
-            {/* Catch all */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
+              {/* Catch all */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
