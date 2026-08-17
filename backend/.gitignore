@@ -73,3 +73,7 @@ alembic/versions/*.pyc
 # OS
 .DS_Store
 Thumbs.db
+
+.env.example
+.env
+env.example
