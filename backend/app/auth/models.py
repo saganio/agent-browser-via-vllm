@@ -71,7 +71,7 @@ class User(Base):
     
     # Organization & Role
     organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
-    role = Column(Enum(Role), default=Role.VIEWER, nullable=False)
+    role = Column(Enum(Role, values_callable=lambda obj: [e.value for e in obj]), default=Role.VIEWER, nullable=False)
     
     # Status
     is_active = Column(Boolean, default=True)
