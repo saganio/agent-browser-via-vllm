@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '@/api/client';
 import { Project, PaginatedResponse } from '@/types';
-import { TkButton, TkCard } from '@takeoff-ui/react';
 import { format } from 'date-fns';
 
 export function Projects() {
@@ -13,13 +12,12 @@ export function Projects() {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   
-  // Create form state
   const [newProject, setNewProject] = useState({
     name: '',
     description: '',
     vllm_config: {
       api_url: 'http://localhost:8000',
-      model_name: '',
+      model_name: 'Qwen2.5-7B-Instruct',
       temperature: 0.7,
       max_tokens: 2048,
     },
@@ -66,7 +64,7 @@ export function Projects() {
         description: '',
         vllm_config: {
           api_url: 'http://localhost:8000',
-          model_name: '',
+          model_name: 'Qwen2.5-7B-Instruct',
           temperature: 0.7,
           max_tokens: 2048,
         },
@@ -83,20 +81,21 @@ export function Projects() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Top Banner */}
+      <div className="p-6 glass-card rounded-2xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Projects</h1>
-          <p className="text-slate-500 mt-1">Manage your browser testing projects</p>
+          <h1 className="text-2xl font-black text-white tracking-tight">Project Workspaces</h1>
+          <p className="text-slate-400 text-xs font-mono mt-1">Configure vLLM model parameters & target web environments</p>
         </div>
-        <TkButton
-          variant="primary"
-          label="New Project"
+        <button
           onClick={() => setShowCreateModal(true)}
-        />
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl font-semibold text-xs shadow-lg shadow-cyan-500/20 transition-all font-mono"
+        >
+          + New Workspace Project
+        </button>
       </div>
 
-      {/* Search */}
+      {/* Search Input */}
       <div className="max-w-md">
         <input
           type="text"
@@ -105,37 +104,36 @@ export function Projects() {
             setSearch(e.target.value);
             setPage(1);
           }}
-          placeholder="Search projects..."
-          className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 placeholder-slate-400 focus:outline-none focus:border-blue-500"
+          placeholder="Filter projects by name or description..."
+          className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-xs font-mono text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
         />
       </div>
 
-      {/* Projects grid */}
+      {/* Projects Grid */}
       {isLoading ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="flex flex-col items-center justify-center h-64 space-y-3">
+          <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-xs font-mono text-slate-400">Loading workspaces...</p>
         </div>
       ) : projects.length > 0 ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((project) => (
-              <TkCard key={project.id}>
-                <div className="p-6 bg-white rounded-lg border border-slate-200 hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div key={project.id} className="glass-card glass-card-hover p-6 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20 text-white">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                       </svg>
                     </div>
                     <div className="flex items-center gap-2">
-                      {project.is_active ? (
-                        <span className="px-2 py-0.5 text-xs font-medium rounded status-completed">Active</span>
-                      ) : (
-                        <span className="px-2 py-0.5 text-xs font-medium rounded status-cancelled">Inactive</span>
-                      )}
+                      <span className={`px-2.5 py-0.5 text-[10px] font-mono font-semibold rounded-full ${project.is_active ? 'status-completed' : 'status-cancelled'}`}>
+                        {project.is_active ? 'ACTIVE' : 'INACTIVE'}
+                      </span>
                       <Link 
                         to={`/projects/${project.id}/settings`}
-                        className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded transition-colors"
+                        className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-lg transition-all"
                         title="Project Settings"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,107 +144,99 @@ export function Projects() {
                     </div>
                   </div>
                   
-                  <h3 className="text-lg font-semibold text-slate-800 mb-2">{project.name}</h3>
-                  <p className="text-sm text-slate-500 line-clamp-2 mb-4">
-                    {project.description || 'No description provided'}
+                  <h3 className="text-base font-bold text-slate-100 mb-1">{project.name}</h3>
+                  <p className="text-xs text-slate-400 line-clamp-2 mb-4">
+                    {project.description || 'No project description.'}
                   </p>
-
-                  <div className="pt-4 border-t border-slate-200 flex items-center justify-between text-sm">
-                    <span className="text-slate-500">
-                      {format(new Date(project.created_at), 'MMM d, yyyy')}
-                    </span>
-                    <span className="text-slate-500">
-                      {project.vllm_config?.model_name || 'No model'}
-                    </span>
-                  </div>
                 </div>
-              </TkCard>
+
+                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-500">
+                  <span>{format(new Date(project.created_at), 'MMM d, yyyy')}</span>
+                  <span className="text-cyan-400">{project.vllm_config?.model_name || 'vLLM Default'}</span>
+                </div>
+              </div>
             ))}
           </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2">
-              <TkButton
-                variant="secondary"
-                label="Previous"
+            <div className="flex items-center justify-center gap-3 pt-4">
+              <button
                 disabled={page === 1}
                 onClick={() => setPage(p => p - 1)}
-              />
-              <span className="px-4 text-slate-600">
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 disabled:opacity-40 rounded-xl text-xs font-mono text-slate-300"
+              >
+                ← Prev
+              </button>
+              <span className="text-xs font-mono text-slate-400">
                 Page {page} of {totalPages}
               </span>
-              <TkButton
-                variant="secondary"
-                label="Next"
+              <button
                 disabled={page === totalPages}
                 onClick={() => setPage(p => p + 1)}
-              />
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 disabled:opacity-40 rounded-xl text-xs font-mono text-slate-300"
+              >
+                Next →
+              </button>
             </div>
           )}
         </>
       ) : (
-        <TkCard>
-          <div className="p-12 text-center bg-white rounded-lg border border-slate-200">
-            <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">No projects yet</h3>
-            <p className="text-slate-500 mb-6">Create your first project to start automating browser tests</p>
-            <TkButton
-              variant="primary"
-              label="Create Project"
-              onClick={() => setShowCreateModal(true)}
-            />
-          </div>
-        </TkCard>
+        <div className="glass-card p-12 text-center rounded-2xl border border-slate-800">
+          <h3 className="text-base font-bold text-slate-200 mb-1">No Projects Found</h3>
+          <p className="text-xs text-slate-400 mb-6 font-mono">Create your first test automation project workspace to get started</p>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl font-semibold text-xs shadow-lg shadow-cyan-500/20 transition-all font-mono"
+          >
+            Create Project
+          </button>
+        </div>
       )}
 
       {/* Create Project Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl border border-slate-200 shadow-xl w-full max-w-lg animate-slide-up">
-            <div className="p-6 border-b border-slate-200">
-              <h2 className="text-xl font-semibold text-slate-800">Create New Project</h2>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="glass-card bg-slate-950 rounded-2xl border border-slate-800 shadow-2xl w-full max-w-lg overflow-hidden animate-slide-up">
+            <div className="p-6 border-b border-slate-800">
+              <h2 className="text-lg font-bold text-white">Create Workspace Project</h2>
             </div>
             
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 font-mono text-xs">
               {createError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-                  {createError}
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400">
+                  ⚠ {createError}
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Project Name *</label>
+                <label className="block uppercase tracking-wider text-slate-400 mb-1.5">Project Name *</label>
                 <input
                   type="text"
                   value={newProject.name}
                   onChange={(e) => setNewProject(p => ({ ...p, name: e.target.value }))}
-                  placeholder="My Browser Tests"
-                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                  placeholder="e.g. E-Commerce Checkout Suite"
+                  className="w-full px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
+                <label className="block uppercase tracking-wider text-slate-400 mb-1.5">Description</label>
                 <textarea
                   value={newProject.description}
                   onChange={(e) => setNewProject(p => ({ ...p, description: e.target.value }))}
-                  placeholder="Describe what this project tests..."
+                  placeholder="Describe scope of tests in this project..."
                   rows={3}
-                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 placeholder-slate-400 focus:outline-none focus:border-blue-500 resize-none"
+                  className="w-full px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500 resize-none"
                 />
               </div>
 
-              <div className="pt-4 border-t border-slate-200">
-                <h3 className="text-sm font-medium text-slate-700 mb-3">vLLM Configuration</h3>
+              <div className="pt-3 border-t border-slate-800">
+                <h3 className="uppercase tracking-wider text-cyan-400 font-semibold mb-3">vLLM Agent Settings</h3>
                 
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs text-slate-500 mb-1">API URL</label>
+                    <label className="block text-slate-400 mb-1">API Endpoint URL</label>
                     <input
                       type="text"
                       value={newProject.vllm_config.api_url}
@@ -255,12 +245,12 @@ export function Projects() {
                         vllm_config: { ...p.vllm_config, api_url: e.target.value }
                       }))}
                       placeholder="http://localhost:8000"
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                      className="w-full px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs text-slate-500 mb-1">Model Name</label>
+                    <label className="block text-slate-400 mb-1">Model ID Name</label>
                     <input
                       type="text"
                       value={newProject.vllm_config.model_name}
@@ -268,26 +258,28 @@ export function Projects() {
                         ...p,
                         vllm_config: { ...p.vllm_config, model_name: e.target.value }
                       }))}
-                      placeholder="llama-3.1-8b"
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                      placeholder="Qwen2.5-7B-Instruct"
+                      className="w-full px-3.5 py-2 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500"
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="p-6 border-t border-slate-200 flex justify-end gap-3">
-              <TkButton
-                variant="secondary"
-                label="Cancel"
+            <div className="p-6 border-t border-slate-800 flex justify-end gap-3 font-mono text-xs">
+              <button
                 onClick={() => setShowCreateModal(false)}
-              />
-              <TkButton
-                variant="primary"
-                label={isCreating ? 'Creating...' : 'Create Project'}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-slate-300"
+              >
+                Cancel
+              </button>
+              <button
                 disabled={isCreating}
                 onClick={handleCreate}
-              />
+                className="px-5 py-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white rounded-xl font-semibold shadow-lg shadow-cyan-500/20"
+              >
+                {isCreating ? 'Creating...' : 'Create Project'}
+              </button>
             </div>
           </div>
         </div>

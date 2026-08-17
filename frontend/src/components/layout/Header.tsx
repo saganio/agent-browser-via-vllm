@@ -27,21 +27,21 @@ export function Header() {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'admin':
-        return 'bg-red-100 text-red-700 border-red-200';
+        return 'bg-purple-500/15 text-purple-400 border-purple-500/30';
       case 'developer':
-        return 'bg-blue-100 text-blue-700 border-blue-200';
+        return 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30';
       default:
-        return 'bg-slate-100 text-slate-600 border-slate-200';
+        return 'bg-slate-500/15 text-slate-400 border-slate-500/30';
     }
   };
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6">
-      {/* Search */}
-      <div className="flex-1 max-w-xl">
+    <header className="h-16 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80 flex items-center justify-between px-6 z-10 sticky top-0">
+      {/* Search Bar */}
+      <div className="flex-1 max-w-md">
         <div className="relative">
           <svg
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -55,42 +55,47 @@ export function Header() {
           </svg>
           <input
             type="text"
-            placeholder="Search projects, tests..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            placeholder="Search test runs, projects, suites..."
+            className="w-full pl-10 pr-12 py-2 bg-slate-900/90 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all font-mono"
           />
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-0.5 bg-slate-100 border border-slate-200 rounded text-xs text-slate-500">
+          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono text-slate-400">
             ⌘K
           </kbd>
         </div>
       </div>
 
-      {/* Right side */}
+      {/* Right Action Bar */}
       <div className="flex items-center gap-4">
-        {/* Notifications */}
-        <button className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-            />
+        {/* System Health Pulse */}
+        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-xs font-mono">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span className="text-slate-400">Worker Status:</span>
+          <span className="text-emerald-400 font-semibold">Ready</span>
+        </div>
+
+        {/* Quick Launch Test Button */}
+        <button
+          onClick={() => navigate('/tests/run')}
+          className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-medium rounded-xl shadow-lg shadow-blue-500/20 transition-all duration-200"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
           </svg>
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+          New Run
         </button>
 
-        {/* User menu */}
+        {/* User Account Menu */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowDropdown(!showDropdown)}
-            className="flex items-center gap-3 p-1.5 hover:bg-slate-100 rounded-lg transition-colors"
+            className="flex items-center gap-3 p-1 rounded-xl hover:bg-slate-900/80 border border-transparent hover:border-slate-800 transition-all"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-medium text-sm">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 via-cyan-500 to-emerald-500 rounded-lg flex items-center justify-center text-white font-mono font-bold text-sm shadow-md">
               {user?.name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
             </div>
             <div className="text-left hidden sm:block">
-              <p className="text-sm font-medium text-slate-700">{user?.name || 'User'}</p>
-              <p className="text-xs text-slate-500">{user?.email}</p>
+              <p className="text-xs font-semibold text-slate-200">{user?.name || 'User'}</p>
+              <p className="text-[11px] text-slate-400 font-mono">{user?.email}</p>
             </div>
             <svg
               className={`w-4 h-4 text-slate-400 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
@@ -103,27 +108,27 @@ export function Header() {
           </button>
 
           {showDropdown && (
-            <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-lg shadow-xl z-50 animate-fade-in">
-              <div className="p-4 border-b border-slate-200">
-                <p className="text-sm font-medium text-slate-700">{user?.name}</p>
-                <p className="text-xs text-slate-500">{user?.email}</p>
+            <div className="absolute right-0 mt-2 w-64 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in">
+              <div className="p-4 border-b border-slate-800/80 bg-slate-950/60">
+                <p className="text-sm font-semibold text-white">{user?.name}</p>
+                <p className="text-xs text-slate-400 font-mono mt-0.5">{user?.email}</p>
                 <span
-                  className={`inline-block mt-2 px-2 py-0.5 text-xs font-medium rounded border ${getRoleBadgeColor(
+                  className={`inline-block mt-2.5 px-2.5 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wider rounded-full border ${getRoleBadgeColor(
                     user?.role || 'viewer'
                   )}`}
                 >
-                  {user?.role?.toUpperCase()}
+                  {user?.role}
                 </span>
               </div>
-              <div className="p-2">
+              <div className="p-2 space-y-1">
                 <button
                   onClick={() => {
                     setShowDropdown(false);
                     navigate('/settings');
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-slate-300 hover:bg-slate-800/80 hover:text-white rounded-xl transition-colors"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -137,13 +142,13 @@ export function Header() {
                       d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                     />
                   </svg>
-                  Settings
+                  Account Settings
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-xl transition-colors"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"

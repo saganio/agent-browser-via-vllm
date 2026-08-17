@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { apiClient } from '@/api/client';
 import { Project, TestRun, WSMessage } from '@/types';
-import { TkButton, TkTextarea, TkCard } from '@takeoff-ui/react';
 
 export function TestRunner() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -44,11 +43,9 @@ export function TestRunner() {
     setMessages([]);
 
     try {
-      // Create test run
       const testRun = await apiClient.executeTest(selectedProject, command) as TestRun;
       setCurrentTestRun(testRun);
 
-      // Connect to WebSocket for real-time updates
       const token = apiClient.getAccessToken();
       const wsUrl = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/tests/${testRun.id}/execute?token=${token}`;
       
@@ -57,7 +54,6 @@ export function TestRunner() {
 
       ws.onmessage = (event) => {
         const message: WSMessage = JSON.parse(event.data);
-        
         if (message.type === 'ping') return;
         
         setMessages(prev => [...prev, message]);
@@ -72,7 +68,7 @@ export function TestRunner() {
         setMessages(prev => [...prev, {
           type: 'error',
           test_run_id: testRun.id,
-          data: { error: 'WebSocket connection error' }
+          data: { error: 'WebSocket stream connection error' }
         }]);
       };
 
@@ -85,7 +81,7 @@ export function TestRunner() {
       setMessages([{
         type: 'error',
         test_run_id: 0,
-        data: { error: error instanceof Error ? error.message : 'Failed to start test' }
+        data: { error: error instanceof Error ? error.message : 'Failed to initialize test run' }
       }]);
     }
   };
@@ -96,58 +92,22 @@ export function TestRunner() {
     }
   };
 
-  const getMessageIcon = (type: string) => {
+  const getMessageBadge = (type: string) => {
     switch (type) {
       case 'status':
-        return (
-          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-            <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        );
+        return <span className="px-2 py-0.5 text-[10px] font-mono font-semibold rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">INFO</span>;
       case 'tool_call':
-        return (
-          <div className="w-6 h-6 bg-purple-100 rounded-full flex items-center justify-center">
-            <svg className="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            </svg>
-          </div>
-        );
+        return <span className="px-2 py-0.5 text-[10px] font-mono font-semibold rounded bg-purple-500/20 text-purple-400 border border-purple-500/30">TOOL</span>;
       case 'tool_result':
-        return (
-          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-            <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-        );
+        return <span className="px-2 py-0.5 text-[10px] font-mono font-semibold rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">RESULT</span>;
       case 'llm_response':
-        return (
-          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-            <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-            </svg>
-          </div>
-        );
+        return <span className="px-2 py-0.5 text-[10px] font-mono font-semibold rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">AI RESP</span>;
       case 'complete':
-        return (
-          <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-            <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        );
+        return <span className="px-2 py-0.5 text-[10px] font-mono font-semibold rounded bg-emerald-500/30 text-emerald-300 border border-emerald-400/40">SUCCESS</span>;
       case 'error':
-        return (
-          <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
-            <svg className="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        );
+        return <span className="px-2 py-0.5 text-[10px] font-mono font-semibold rounded bg-red-500/20 text-red-400 border border-red-500/30">ERROR</span>;
       default:
-        return null;
+        return <span className="px-2 py-0.5 text-[10px] font-mono font-semibold rounded bg-slate-800 text-slate-400">EVENT</span>;
     }
   };
 
@@ -156,13 +116,13 @@ export function TestRunner() {
     
     switch (msg.type) {
       case 'status':
-        return <p className="text-slate-600">{data.message as string}</p>;
+        return <p className="text-slate-300 font-mono text-xs">{data.message as string}</p>;
       
       case 'tool_call':
         return (
           <div>
-            <p className="text-purple-600 font-medium">{data.tool_name as string}</p>
-            <pre className="mt-2 p-2 bg-slate-100 rounded text-xs text-slate-600 overflow-x-auto">
+            <p className="text-purple-400 font-mono font-semibold text-xs">{data.tool_name as string}</p>
+            <pre className="mt-1.5 p-2 bg-slate-950 rounded-lg text-xs font-mono text-slate-300 border border-slate-800 overflow-x-auto">
               {JSON.stringify(data.arguments, null, 2)}
             </pre>
           </div>
@@ -175,159 +135,180 @@ export function TestRunner() {
           : null;
         return (
           <div>
-            <p className={`font-medium ${result.success ? 'text-green-600' : 'text-red-600'}`}>
-              {data.tool_name as string}: {result.success ? 'Success' : 'Failed'}
+            <p className={`font-mono text-xs font-semibold ${result.success ? 'text-emerald-400' : 'text-red-400'}`}>
+              {data.tool_name as string}: {result.success ? 'PASS' : 'FAIL'}
             </p>
             {resultDataStr && (
-              <pre className="mt-2 p-2 bg-slate-100 rounded text-xs text-slate-600 overflow-x-auto max-h-40">
+              <pre className="mt-1.5 p-2 bg-slate-950 rounded-lg text-xs font-mono text-slate-300 border border-slate-800 max-h-40 overflow-y-auto">
                 {resultDataStr}
               </pre>
             )}
             {result.error && (
-              <p className="mt-2 text-sm text-red-600">{result.error}</p>
+              <p className="mt-1 text-xs font-mono text-red-400">{result.error}</p>
             )}
           </div>
         );
       
       case 'llm_response':
-        return <p className="text-slate-600 whitespace-pre-wrap">{data.content as string}</p>;
+        return <p className="text-slate-200 font-mono text-xs whitespace-pre-wrap">{data.content as string}</p>;
       
       case 'complete':
-        return <p className="text-green-600 font-medium">{data.message as string}</p>;
+        return <p className="text-emerald-400 font-mono font-semibold text-xs">{data.message as string}</p>;
       
       case 'error':
-        return <p className="text-red-600">{data.error as string}</p>;
+        return <p className="text-red-400 font-mono text-xs">{data.error as string}</p>;
       
       default:
-        return <pre className="text-xs text-slate-500">{JSON.stringify(data, null, 2)}</pre>;
+        return <pre className="text-xs font-mono text-slate-400">{JSON.stringify(data, null, 2)}</pre>;
     }
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Test Runner</h1>
-        <p className="text-slate-500 mt-1">Execute browser tests using natural language commands</p>
+      {/* Header Banner */}
+      <div className="p-6 glass-card rounded-2xl border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-white tracking-tight">AI Test Execution Terminal</h1>
+          <p className="text-slate-400 text-xs font-mono mt-1">Run natural language browser automation powered by vLLM agent</p>
+        </div>
+        {isExecuting && (
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-mono">
+            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+            Executing Test Run #{currentTestRun?.id}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Input panel */}
-        <TkCard>
-          <div className="p-6 space-y-4 bg-white rounded-lg border border-slate-200">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Project</label>
-              <select
-                value={selectedProject || ''}
-                onChange={(e) => setSelectedProject(Number(e.target.value))}
-                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 focus:outline-none focus:border-blue-500"
-              >
-                <option value="">Select a project</option>
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Command</label>
-              <TkTextarea
-                value={command}
-                onTkInput={(e: CustomEvent) => setCommand(e.detail.value)}
-                placeholder="Enter your test command in natural language...
-
-Example: Go to google.com, search for 'OpenAI', click the first result, and take a screenshot"
-                rows={6}
-                disabled={isExecuting}
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <TkButton
-                variant="primary"
-                label={isExecuting ? 'Running...' : 'Run Test'}
-                disabled={!selectedProject || !command.trim() || isExecuting}
-                onClick={executeTest}
-              />
-              {isExecuting && (
-                <TkButton
-                  variant="secondary"
-                  label="Cancel"
-                  onClick={cancelTest}
-                />
-              )}
-            </div>
-
-            {/* Quick commands */}
-            <div className="pt-4 border-t border-slate-200">
-              <p className="text-sm text-slate-500 mb-2">Quick commands:</p>
-              <div className="flex flex-wrap gap-2">
-                {[
-                  'Navigate to example.com and take a screenshot',
-                  'Search Google for "test automation"',
-                  'Fill the login form and submit',
-                ].map((cmd, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setCommand(cmd)}
-                    className="px-3 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg transition-colors"
-                    disabled={isExecuting}
-                  >
-                    {cmd.slice(0, 30)}...
-                  </button>
-                ))}
-              </div>
-            </div>
+        {/* Command Prompt Form Panel */}
+        <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-5">
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-2">Target Workspace Project</label>
+            <select
+              value={selectedProject || ''}
+              onChange={(e) => setSelectedProject(Number(e.target.value))}
+              className="w-full px-4 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-200 text-xs font-mono focus:outline-none focus:border-cyan-500"
+            >
+              <option value="">Select Target Project</option>
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                </option>
+              ))}
+            </select>
           </div>
-        </TkCard>
 
-        {/* Output panel */}
-        <TkCard>
-          <div className="p-6 bg-white rounded-lg border border-slate-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-800">Execution Log</h3>
-              {isExecuting && (
-                <div className="flex items-center gap-2 text-sm text-blue-600">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                  Running
-                </div>
-              )}
-            </div>
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-wider text-slate-400 mb-2">AI Natural Language Prompt</label>
+            <textarea
+              value={command}
+              onChange={(e) => setCommand(e.target.value)}
+              placeholder={`Enter test steps in plain text...\n\nExample: Go to google.com, search for 'vLLM agent browser', click the top result and verify navigation.`}
+              rows={6}
+              disabled={isExecuting}
+              className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-500 font-mono text-xs leading-relaxed"
+            />
+          </div>
 
-            <div className="h-[500px] overflow-y-auto space-y-3 pr-2">
-              {messages.length > 0 ? (
-                messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className="flex gap-3 p-3 bg-slate-50 rounded-lg animate-slide-up"
-                  >
-                    {getMessageIcon(msg.type)}
-                    <div className="flex-1 min-w-0">
-                      {renderMessageContent(msg)}
-                      {msg.timestamp && (
-                        <p className="text-xs text-slate-400 mt-1">
-                          {new Date(msg.timestamp).toLocaleTimeString()}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              disabled={!selectedProject || !command.trim() || isExecuting}
+              onClick={executeTest}
+              className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 via-cyan-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500 disabled:opacity-40 text-white rounded-xl font-semibold text-xs shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2 font-mono"
+            >
+              {isExecuting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Executing...
+                </>
               ) : (
-                <div className="h-full flex items-center justify-center text-slate-500">
-                  <div className="text-center">
-                    <svg className="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p>Execution output will appear here</p>
-                  </div>
-                </div>
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  </svg>
+                  Run Agent Test
+                </>
               )}
-              <div ref={messagesEndRef} />
+            </button>
+            {isExecuting && (
+              <button
+                onClick={cancelTest}
+                className="py-3 px-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl font-mono text-xs font-semibold transition-all"
+              >
+                Abort
+              </button>
+            )}
+          </div>
+
+          {/* Quick Preset Prompt Snippets */}
+          <div className="pt-4 border-t border-slate-800/80">
+            <p className="text-[11px] font-mono uppercase tracking-wider text-slate-500 mb-2.5">Preset Test Prompts:</p>
+            <div className="space-y-2">
+              {[
+                'Navigate to https://example.com and check main header title',
+                'Go to google.com, search for "vLLM agent browser" and capture screenshot',
+                'Check login form inputs and verify validation errors',
+              ].map((cmd, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCommand(cmd)}
+                  disabled={isExecuting}
+                  className="w-full text-left p-2.5 bg-slate-900/60 hover:bg-slate-900 border border-slate-800 hover:border-cyan-500/30 rounded-xl text-xs font-mono text-slate-300 transition-all truncate block"
+                >
+                  ⚡ {cmd}
+                </button>
+              ))}
             </div>
           </div>
-        </TkCard>
+        </div>
+
+        {/* Real-time Execution Log Terminal Panel */}
+        <div className="glass-card p-6 rounded-2xl border border-slate-800 flex flex-col h-[560px]">
+          <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+            <div className="flex items-center gap-2">
+              <span className="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+              <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+              <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+              <span className="ml-2 text-xs font-mono text-slate-400">ws://live-execution-feed</span>
+            </div>
+            {isExecuting && (
+              <span className="text-[10px] font-mono text-cyan-400 animate-pulse">STREAMING LIVE</span>
+            )}
+          </div>
+
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2 font-mono">
+            {messages.length > 0 ? (
+              messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className="p-3 bg-slate-950/80 rounded-xl border border-slate-800/80 space-y-1.5"
+                >
+                  <div className="flex items-center justify-between">
+                    {getMessageBadge(msg.type)}
+                    {msg.timestamp && (
+                      <span className="text-[10px] font-mono text-slate-500">
+                        {new Date(msg.timestamp).toLocaleTimeString()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="pt-1">
+                    {renderMessageContent(msg)}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="h-full flex items-center justify-center text-slate-500 font-mono text-xs">
+                <div className="text-center space-y-2">
+                  <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center mx-auto text-slate-600">
+                    &gt;_
+                  </div>
+                  <p>Awaiting test execution trigger...</p>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
       </div>
     </div>
   );
