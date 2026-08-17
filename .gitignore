@@ -1,0 +1,21 @@
+# Local agent skills and customizations
+.agents/
+
+# Dependencies
+node_modules/
+backend/venv/
+
+# Environment files
+.env
+.env.local
+backend/.env
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Logs & temp
+*.log
+storage/
+artifacts/
+.DS_Store
